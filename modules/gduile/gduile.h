@@ -1,0 +1,66 @@
+#ifndef GDUILE_H
+#define GDUILE_H
+
+#include "core/script_language.h"
+
+class GDuileLang : public ScriptLanguage {
+
+  static GDuileLang *singleton;
+  
+public:
+  String get_name() const ;
+
+  /* LANGUAGE FUNCTIONS */
+  void init();
+  String get_type() const ;
+  String get_extension() const ;
+  Error execute_file(const String &p_path) ;
+  void finish() ;
+
+  /* EDITOR FUNCTIONS */
+  void get_reserved_words(List<String> *p_words) const ;
+  void get_comment_delimiters(List<String> *p_delimiters) const ;
+  void get_string_delimiters(List<String> *p_delimiters) const ;
+  Ref<Script> get_template(const String &p_class_name, const String &p_base_class_name) const ;
+  bool validate(const String &p_script, int &r_line_error, int &r_col_error, String &r_test_error, const String &p_path = "", List<String> *r_functions = NULL, List<ScriptLanguage::Warning> *r_warnings = NULL, Set<int> *r_safe_lines = NULL) const ;
+  Script *create_script() const ;
+  bool has_named_classes() const ;
+  bool supports_builtin_mode() const ;
+  int find_function(const String &p_function, const String &p_code) const ;
+  String make_function(const String &p_class, const String &p_name, const PoolStringArray &p_args) const ;
+
+  void auto_indent_code(String &p_code, int p_from_line, int p_to_line) const ;
+  void add_global_constant(const StringName &p_variable, const Variant &p_value) ;
+  
+  /* DEBUGGER FUNCTIONS */
+
+  String debug_get_error() const ;
+  int debug_get_stack_level_count() const ;
+  int debug_get_stack_level_line(int p_level) const ;
+  String debug_get_stack_level_function(int p_level) const ;
+  String debug_get_stack_level_source(int p_level) const ;
+  void debug_get_stack_level_locals(int p_level, List<String> *p_locals, List<Variant> *p_values, int p_max_subitems = -1, int p_max_depth = -1) ;
+  void debug_get_stack_level_members(int p_level, List<String> *p_members, List<Variant> *p_values, int p_max_subitems = -1, int p_max_depth = -1) ;
+  void debug_get_globals(List<String> *p_globals, List<Variant> *p_values, int p_max_subitems = -1, int p_max_depth = -1) ;
+  String debug_parse_stack_level_expression(int p_level, const String &p_expression, int p_max_subitems = -1, int p_max_depth = -1) ;
+
+  void reload_all_scripts() ;
+  void reload_tool_script(const Ref<Script> &p_script, bool p_soft_reload) ;
+  /* LOADER FUNCTIONS */
+
+  void get_recognized_extensions(List<String> *p_extensions) const;
+  void get_public_functions(List<MethodInfo> *p_functions) const;
+  void get_public_constants(List<Pair<String, Variant> > *p_constants) const;
+
+  void profiling_start();
+  void profiling_stop();
+
+  int profiling_get_accumulated_data(ProfilingInfo *p_info_arr, int p_info_max);
+  int profiling_get_frame_data(ProfilingInfo *p_info_arr, int p_info_max);
+
+  GDuileLang();
+  ~GDuileLang();
+};
+
+
+#endif /* GDUILE_H */
