@@ -3,9 +3,53 @@
 
 #include "core/script_language.h"
 
+class GDuileScript: public Script {
+  GDCLASS(GDScript, Script);
+  bool tool;
+  bool valid;
+
+  friend class GDuileLang;
+
+public:
+  virtual bool is_valid() const { return valid; }
+
+  bool is_tool() const { return tool; }
+
+  virtual bool can_instance() const;
+  virtual Ref<Script> get_base_script() const;
+  virtual StringName get_instance_base_type() const;
+  virtual ScriptInstance *instance_create(Object *p_this);
+  virtual PlaceHolderScriptInstance *placeholder_instance_create(Object *p_this);
+  virtual bool instance_has(const Object *p_this) const;
+
+  virtual bool has_source_code() const;
+  virtual String get_source_code() const;
+  virtual void set_source_code(const String &p_code);
+  virtual void update_exports();
+
+  virtual Error reload(bool p_keep_state = false);
+
+  virtual void get_script_method_list(List<Script::MethodInfo> *p_list) const;
+  virtual bool has_method(const StringName &p_method) const;
+  virtual Script::MethodInfo get_method_info(const StringName &p_method) const;
+
+  virtual void get_script_property_list(List<Script::PropertyInfo> *p_list) const;
+  virtual ScriptLanguage *get_language() const;
+
+  virtual int get_member_line(const StringName &p_method) const { return -1; }
+
+  virtual void get_constants(Map<StringName, Variant> *p_constants);
+  virtual void get_members(Set<StringName> *p_members);
+
+  GDuileScript();
+  ~GDuileScript();
+}
+
 class GDuileLang : public ScriptLanguage {
 
   static GDuileLang *singleton;
+
+  friend class GDuileScript;
   
 public:
   String get_name() const ;
