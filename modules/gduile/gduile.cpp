@@ -1,5 +1,21 @@
 #include "gduile.h"
 
+String GDuileScript::get_name() const {
+  return name;
+}
+
+void GDuileScript::set_name(const String &p_name) {
+  name = p_name;
+}
+
+String GDuileScript::get_path() const {
+  return path;
+}
+
+void GDuileScript::set_path(const String &p_path) {
+  path = p_path;
+}
+
 bool GDuileScript::can_instance() const {
   return valid;
 }
@@ -13,7 +29,7 @@ Ref<Script> GDuileScript::get_base_script() const {
 }
 
 StringName GDuileScript::get_instance_base_type() const {
-  if (_base->is_valid()) {
+  if (_base && _base->is_valid()) {
     return _base->get_instance_base_type();
   } else {
     return StringName();
@@ -140,7 +156,15 @@ void GDuileLang::finish() {
 void GDuileLang::get_reserved_words(List<String> *p_words) const {}
 void GDuileLang::get_comment_delimiters(List<String> *p_delimiters) const {}
 void GDuileLang::get_string_delimiters(List<String> *p_delimiters) const {}
-Ref<Script> GDuileLang::get_template(const String &p_class_name, const String &p_base_class_name) const { return NULL; }
+Ref<Script> GDuileLang::get_template(const String &p_class_name, const String &p_base_class_name) const {
+  String _template = "(extends %BASE%)\n";
+  _template = _template.replace("%BASE%", p_base_class_name);
+  Ref<GDuileScript> script;
+  script.instance();
+  script->set_source_code(_template);
+
+  return script;
+}
 bool GDuileLang::validate(const String &p_script, int &r_line_error, int &r_col_error, String &r_test_error, const String &p_path, List<String> *r_functions, List<ScriptLanguage::Warning> *r_warnings, Set<int> *r_safe_lines) const { return true; }
 Script* GDuileLang::create_script() const {
   return memnew(GDuileScript);
@@ -188,4 +212,80 @@ GDuileLang::GDuileLang() {
 
 GDuileLang::~GDuileLang() {
   singleton = NULL;
+}
+
+// Resource
+RES ResourceFormatLoaderGDuile::load(const String &p_path, const String &p_original_path, Error *r_error) {
+  if (r_error) {
+    *r_error = ERR_FILE_CANT_OPEN;
+  }
+
+  GDuileScript *script = memnew(GDuileScript);
+  Ref<GDuileScript> scriptres(script);
+
+  Error err;
+  String source_code = FileAccess::get_file_as_string(p_path, &err);
+  ERR_FAIL_COND_V_MSG(err != OK, RES(), "Cannot load source code from file '" + p_path +"'.");
+  script->set_source_code(source_code);
+  script->set_path(p_original_path);
+
+  script->reload();
+
+  if(r_error) {
+    *r_error = OK;
+  }
+
+  return scriptres;
+}
+
+void ResourceFormatLoaderGDuile::get_recognized_extensions(List<String> *p_extensions) const {
+  p_extensions->push_back("scm");
+}
+
+bool ResourceFormatLoaderGDuile::handles_type(const String &p_type) const {
+  return (p_type == "Script" || p_type == "GDuileScript");
+}
+
+String ResourceFormatLoaderGDuile::get_resource_type(const String &p_path) const {
+  String el = p_path.get_extension().to_lower();
+  if (el == "scm") {
+    return "GDuileScript";
+  }
+  return "";
+}
+
+void ResourceFormatLoaderGDuile::get_dependencies(const String &p_path, List<String> *p_dependencies, bool p_add_types) {
+  //TODO
+}
+
+Error ResourceFormatSaverGDuile::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+  Ref<GDuileScript> sqscr = p_resource;
+  ERR_FAIL_COND_V(sqscr.is_null(), ERR_INVALID_PARAMETER);
+
+  String source = sqscr->get_source_code();
+
+  Error err;
+  FileAccess *file = FileAccess::open(p_path, FileAccess::WRITE, &err);
+
+  ERR_FAIL_COND_V_MSG(err, err, "Cannot save GDuile file '" + p_path + "'.");
+
+  file->store_string(source);
+  if (file->get_error() != OK && file->get_error() != ERR_FILE_EOF) {
+    memdelete(file);
+    return ERR_CANT_CREATE;
+  }
+  file->close();
+  memdelete(file);
+
+  return OK;
+}
+
+void ResourceFormatSaverGDuile::get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const {
+  if (Object::cast_to<GDuileScript>(*p_resource)) {
+    p_extensions->push_back("scm");
+  }
+}
+
+bool ResourceFormatSaverGDuile::recognize(const RES &p_resource) const {
+  return Object::cast_to<GDuileScript>(*p_resource) != NULL;
 }

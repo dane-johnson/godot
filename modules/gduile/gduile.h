@@ -1,6 +1,9 @@
 #ifndef GDUILE_H
 #define GDUILE_H
 
+#include "core/os/file_access.h"
+#include "core/io/resource_loader.h"
+#include "core/io/resource_saver.h"
 #include "core/script_language.h"
 
 class GDuileScript: public Script {
@@ -9,6 +12,8 @@ class GDuileScript: public Script {
   bool valid;
   Script *_base;
   String source_code;
+  String path;
+  String name;
 
   friend class GDuileLang;
 
@@ -16,6 +21,12 @@ public:
   virtual bool is_valid() const { return valid; }
 
   bool is_tool() const { return tool; }
+
+  String get_name() const;
+  void set_name(const String &p_name);
+
+  String get_path() const;
+  void set_path(const String &p_path);
 
   virtual bool can_instance() const;
   virtual Ref<Script> get_base_script() const;
@@ -110,6 +121,22 @@ public:
 
   GDuileLang();
   ~GDuileLang();
+};
+
+class ResourceFormatLoaderGDuile : public ResourceFormatLoader {
+public:
+	virtual RES load(const String &p_path, const String &p_original_path = "", Error *r_error = NULL);
+	virtual void get_recognized_extensions(List<String> *p_extensions) const;
+	virtual bool handles_type(const String &p_type) const;
+	virtual String get_resource_type(const String &p_path) const;
+	virtual void get_dependencies(const String &p_path, List<String> *p_dependencies, bool p_add_types = false);
+};
+
+class ResourceFormatSaverGDuile : public ResourceFormatSaver {
+public:
+  virtual Error save(const String &p_path, const RES &p_resource, uint32_t p_flags = 0);
+  virtual void get_recognized_extensions(const RES &p_resource, List<String> *p_extentions) const;
+  virtual bool recognize(const RES &p_resource) const;
 };
 
 
