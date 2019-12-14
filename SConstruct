@@ -119,6 +119,7 @@ opts.Add(BoolVariable('deprecated', "Enable deprecated features", True))
 opts.Add(BoolVariable('gdscript', "Enable GDScript support", True))
 opts.Add(BoolVariable('minizip', "Enable ZIP archive support using minizip", True))
 opts.Add(BoolVariable('xaudio2', "Enable the XAudio2 audio driver", False))
+opts.Add(BoolVariable('gdscheme', "Enable GDScheme support", True))
 
 # Advanced options
 opts.Add(BoolVariable('verbose', "Enable verbose output for the compilation", False))
@@ -476,6 +477,8 @@ if selected_platform in platform_list:
             env.Append(CPPDEFINES=['_3D_DISABLED'])
     if env['gdscript']:
         env.Append(CPPDEFINES=['GDSCRIPT_ENABLED'])
+    if env['gdscheme']:
+        env.Append(CPPDEFINES=['GDSCHEME_ENABLED'])
     if env['disable_advanced_gui']:
         if env['tools']:
             print("Build option 'disable_advanced_gui=yes' cannot be used with 'tools=yes' (editor), only with 'tools=no' (export template).")

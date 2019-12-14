@@ -4,9 +4,11 @@
 #include "core/script_language.h"
 
 class GDuileScript: public Script {
-  GDCLASS(GDScript, Script);
+  GDCLASS(GDuileScript, Script);
   bool tool;
   bool valid;
+  Script *_base;
+  String source_code;
 
   friend class GDuileLang;
 
@@ -29,11 +31,15 @@ public:
 
   virtual Error reload(bool p_keep_state = false);
 
-  virtual void get_script_method_list(List<Script::MethodInfo> *p_list) const;
+  virtual void get_script_method_list(List<MethodInfo> *p_list) const;
   virtual bool has_method(const StringName &p_method) const;
-  virtual Script::MethodInfo get_method_info(const StringName &p_method) const;
+  virtual MethodInfo get_method_info(const StringName &p_method) const;
 
-  virtual void get_script_property_list(List<Script::PropertyInfo> *p_list) const;
+  virtual bool has_script_signal(const StringName &p_signal) const;
+  virtual void get_script_signal_list(List<MethodInfo> *r_signals) const;
+
+  virtual void get_script_property_list(List<PropertyInfo> *p_list) const;
+  virtual bool get_property_default_value(const StringName &p_property, Variant &r_value) const;
   virtual ScriptLanguage *get_language() const;
 
   virtual int get_member_line(const StringName &p_method) const { return -1; }
@@ -43,7 +49,7 @@ public:
 
   GDuileScript();
   ~GDuileScript();
-}
+};
 
 class GDuileLang : public ScriptLanguage {
 
