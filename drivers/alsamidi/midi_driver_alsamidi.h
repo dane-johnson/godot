@@ -38,23 +38,14 @@
 #include "core/os/thread.h"
 #include "core/vector.h"
 
-#include <alsa/asoundlib.h>
+#include <rtmidi/RtMidi.h>
 #include <stdio.h>
 
 class MIDIDriverALSAMidi : public MIDIDriver {
 
-	Thread *thread;
-	Mutex *mutex;
+	RtMidiIn midiin;
 
-	Vector<snd_rawmidi_t *> connected_inputs;
-
-	bool exit_thread;
-
-	static void thread_func(void *p_udata);
-
-	void lock() const;
-	void unlock() const;
-
+	static void midi_callback(double deltatime, std::vector<unsigned char> *message, void *userData);
 public:
 	virtual Error open();
 	virtual void close();
