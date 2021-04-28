@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="WebRTCPeerConnection" inherits="Reference" version="3.2">
+<class name="WebRTCPeerConnection" inherits="Reference" version="3.3">
 	<brief_description>
 		Interface to a WebRTC peer connection.
 	</brief_description>
@@ -40,7 +40,6 @@
 			<argument index="0" name="label" type="String">
 			</argument>
 			<argument index="1" name="options" type="Dictionary" default="{
-
 }">
 			</argument>
 			<description>
@@ -82,7 +81,6 @@
 			<return type="int" enum="Error">
 			</return>
 			<argument index="0" name="configuration" type="Dictionary" default="{
-
 }">
 			</argument>
 			<description>
